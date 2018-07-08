@@ -1,0 +1,69 @@
+---
+- name: Add the user 'minecraft'
+  user:
+    name: minecraft
+    comment: Manages minecraft server
+    generate_ssh_key: true
+  become: true
+  register: minecraft_user
+
+- name: Retrieve SSH key for user 'minecraft'
+  fetch:
+    src: "{{ minecraft_user.ssh_key_file }}"
+    dest: "{{ inventory_hostname }}/id_rsa"
+    flat: true
+  become: true
+  become_user: minecraft
+
+- name: Change key permissions
+  command: chmod 400 "{{ inventory_hostname }}/id_rsa"
+  args:
+    warn: false
+  delegate_to: localhost
+
+- name: Remove private key
+  file:
+    state: absent
+    path: "{{ minecraft_user.ssh_key_file }}"
+
+- name: Authorize key
+  authorized_key:
+    user: minecraft
+    key: "{{ minecraft_user.ssh_public_key }}"
+  become: true
+  become_user: minecraft
+
+- name: Create server folder
+  file:
+    path: "~minecraft/{{ server_folder }}"
+    state: directory
+  become: true
+  become_user: minecraft
+
+- name: Download server
+  get_url:
+    url: "{{ server_file_url }}"
+    dest: "~minecraft/{{ server_folder }}/server.jar"
+  become: true
+  become_user: minecraft
+
+- name: Copy eula
+  copy:
+    src: eula.txt
+    dest: "~minecraft/{{ server_folder }}/eula.txt"
+  become: true
+  become_user: minecraft
+
+- name: Copy launcher script
+  template:
+    src: launcher.sh
+    dest: "~minecraft/{{ server_folder }}/launcher.sh"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  become_user: minecraft
+
+- name: Add server to startup
+  template:
+    src: minecraft.conf
+    dest: /etc/init/minecraft.conf
+  become: true
