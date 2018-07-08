@@ -1,0 +1,25 @@
+---
+- name: Enable EPEL
+  yum:
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    state: latest
+  become: true
+
+- name: Install NoIP
+  yum:
+    name: noip
+    state: latest
+  become: true
+
+- name: Configure NoIP
+  command: "noip2 -C -u {{ noip.username }} -p {{ noip.password }} -U 30"
+  args:
+    creates: /etc/no-ip2.conf
+  become: true
+
+- name: Enable NoIP service
+  systemd:
+    name: noip.service
+    enabled: yes
+    state: started
+  become: true
