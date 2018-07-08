@@ -1,4 +1,15 @@
 ---
+- name: Set timezone
+  timezone:
+    name: "{{ timezone }}"
+  become: true
+
+- name: Install Java
+  yum:
+    name: java
+    state: latest
+  become: true
+
 - name: Add the user 'minecraft'
   user:
     name: minecraft
@@ -10,13 +21,13 @@
 - name: Retrieve SSH key for user 'minecraft'
   fetch:
     src: "{{ minecraft_user.ssh_key_file }}"
-    dest: "{{ inventory_hostname }}/id_rsa"
+    dest: "keys/{{ inventory_hostname }}"
     flat: true
   become: true
   become_user: minecraft
 
 - name: Change key permissions
-  command: chmod 400 "{{ inventory_hostname }}/id_rsa"
+  command: chmod 400 "keys/{{ inventory_hostname }}"
   args:
     warn: false
   delegate_to: localhost
@@ -54,16 +65,47 @@
   become: true
   become_user: minecraft
 
-- name: Copy launcher script
+- name: Add Minecraft service to systemd
   template:
-    src: launcher.sh
-    dest: "~minecraft/{{ server_folder }}/launcher.sh"
-    mode: u=rwx,g=rx,o=rx
+    src: minecraft.service
+    dest: /etc/systemd/system/minecraft.service
+  become: true
+
+- name: Enable and start Minecraft service
+  systemd:
+    name: minecraft.service
+    enabled: true
+    state: started
+  become: true
+
+- name: Grant 'minecraft' user control of Minecraft service
+  lineinfile:
+    path: /etc/sudoers
+    line: "minecraft ALL= NOPASSWD: /usr/bin/systemctl {{ item }} minecraft.service"
+  loop:
+    - stop
+    - start
+    - restart
+  become: true
+
+- name: Define aliases for starting and stopping the server
+  lineinfile:
+    path: ~minecraft/.bashrc
+    line: "alias {{ item }}=\"sudo systemctl {{ item }} minecraft.service\""
+  loop:
+    - stop
+    - start
+    - restart
   become: true
   become_user: minecraft
 
-- name: Add server to startup
-  template:
-    src: minecraft.conf
-    dest: /etc/init/minecraft.conf
+- name: Define aliases for managing the server
+  blockinfile:
+    path: ~minecraft/.bashrc
+    block: |
+      alias status="systemctl status minecraft.service"
+      alias console="screen -r mc"
   become: true
+  become_user: minecraft
+
+

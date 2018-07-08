@@ -1,3 +1,4 @@
 ---
 java_params: -Xms2048m -Xmx3328m
 server_folder: server
+timezone: America/Toronto

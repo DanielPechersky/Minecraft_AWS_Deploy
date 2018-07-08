@@ -1,0 +1,24 @@
+[Unit]
+Description=Minecraft server
+
+After=network.target
+
+[Service]
+User=minecraft
+Group=minecraft
+
+Type=forking
+
+WorkingDirectory=/home/minecraft/{{ server_folder }}
+
+Restart=always
+
+ExecStart=/usr/bin/screen -dmS mc /usr/bin/java {{ java_params }} -server -jar /home/minecraft/{{ server_folder }}/server.jar nogui
+
+ExecReload=/usr/bin/screen -S mc -p 0 -X eval 'stuff "reload"\\015'
+
+ExecStop=/usr/bin/screen -S mc -p 0 -X eval 'stuff "stop"\\015'
+ExecStop=/bin/sleep 5
+
+[Install]
+WantedBy=multi-user.target
