@@ -21,7 +21,7 @@
 - name: Retrieve SSH key for user 'minecraft'
   fetch:
     src: "{{ minecraft_user.ssh_key_file }}"
-    dest: "keys/{{ inventory_hostname }}"
+    dest: "keys/{{ inventory_hostname }}.key"
     flat: true
   become: true
   become_user: minecraft
