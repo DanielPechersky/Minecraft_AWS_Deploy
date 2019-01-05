@@ -27,9 +27,10 @@
   become_user: minecraft
 
 - name: Change key permissions
-  command: chmod 400 "keys/{{ inventory_hostname }}"
-  args:
-    warn: false
+  file:
+    path: "keys/{{ inventory_hostname }}.key"
+    state: file
+    mode: 0400
   delegate_to: localhost
 
 - name: Remove private key
@@ -44,19 +45,11 @@
   become: true
   become_user: minecraft
 
-- name: Create server folder
-  file:
-    path: "~minecraft/{{ server_folder }}"
-    state: directory
-  become: true
-  become_user: minecraft
+- include_tasks: vanilla.yml
+  when: "'vanilla' in group_names"
 
-- name: Download server
-  get_url:
-    url: "{{ server_file_url }}"
-    dest: "~minecraft/{{ server_folder }}/server.jar"
-  become: true
-  become_user: minecraft
+- include_tasks: modpack.yml
+  when: "'modpack' in group_names"
 
 - name: Copy eula
   copy:
@@ -107,5 +100,3 @@
       alias console="screen -r mc"
   become: true
   become_user: minecraft
-
-

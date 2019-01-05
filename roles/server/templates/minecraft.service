@@ -13,7 +13,7 @@ WorkingDirectory=/home/minecraft/{{ server_folder }}
 
 Restart=always
 
-ExecStart=/usr/bin/screen -dmS mc /usr/bin/java {{ java_params }} -server -jar /home/minecraft/{{ server_folder }}/server.jar nogui
+ExecStart=/usr/bin/screen -dmS mc /usr/bin/java {{ java_params }} -server -jar /home/minecraft/{{ server_folder }}/{{ server_jar }} nogui
 
 ExecReload=/usr/bin/screen -S mc -p 0 -X eval 'stuff "reload"\\015'
 

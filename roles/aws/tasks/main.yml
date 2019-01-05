@@ -1,0 +1,36 @@
+---
+- name: Create VPC group
+  ec2_group:
+    name: minecraft
+    description: Security group for minecraft servers
+    region: "{{ aws_region }}"
+    rules:
+      - rule_desc: ssh
+        proto: tcp
+        ports: 22
+        cidr_ip: 0.0.0.0/0
+        cidr_ipv6: ::/0
+      - rule_desc: minecraft server
+        proto: all
+        ports: 25565
+        cidr_ip: 0.0.0.0/0
+        cidr_ipv6: ::/0
+    aws_access_key: "{{ aws.access_key_id }}"
+    aws_secret_key: "{{ aws.secret_access_key }}"
+  delegate_to: 127.0.0.1
+
+- name: Create ssh key for managing minecraft servers
+  ec2_key:
+    name: minecraft
+    key_material: "{{ lookup('file', public_key) }}"
+    aws_access_key: "{{ aws.access_key_id }}"
+    aws_secret_key: "{{ aws.secret_access_key }}"
+  delegate_to: 127.0.0.1
+
+- name: Create server instance
+  ec2_instance:
+    name: "{{ server_instance_name }}"
+    key_name: minecraft
+    security_group: minecraft
+    state: present
+  delegate_to: 127.0.0.1

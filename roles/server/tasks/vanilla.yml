@@ -1,0 +1,17 @@
+---
+- name: Create server folder
+  file:
+    path: "~minecraft/{{ server_folder }}"
+    state: directory
+  become: true
+  become_user: minecraft
+
+- name: Download server
+  get_url:
+    url: "{{ server_jar_url }}"
+    dest: "~minecraft/{{ server_folder }}/server.jar"
+  become: true
+  become_user: minecraft
+
+- set_fact:
+    server_jar: server.jar

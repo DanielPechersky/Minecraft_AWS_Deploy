@@ -1,0 +1,61 @@
+---
+- name: Create server folder
+  file:
+    path: "~minecraft/{{ server_folder }}"
+    state: directory
+  become: true
+  become_user: minecraft
+
+- name: Download server
+  unarchive:
+    src: "{{ server_file_url }}"
+    dest: "~minecraft/{{ server_folder }}"
+    remote_src: yes
+    list_files: yes
+  register: server_file_contents
+  become: true
+  become_user: minecraft
+
+- name: Find install script
+  find:
+    paths: "~minecraft/{{ server_folder }}"
+    patterns: "^.*[iI][nN][sS][tT][aA][lL].*\\.sh$"
+    use_regex: yes
+  register: install_script_search_results
+  become: true
+  become_user: minecraft
+
+- set_fact:
+    install_script: "{{ install_script_search_results.files[0].path }}"
+
+- debug:
+    msg: "Install script: {{ install_script }}"
+
+- name: Set install script to executable
+  file:
+    path: "{{ install_script }}"
+    mode: u+x
+  become: true
+  become_user: minecraft
+
+- name: Run install script
+  shell: "{{ install_script }}"
+  args:
+    chdir: "~minecraft/{{ server_folder }}"
+  become: true
+  become_user: minecraft
+
+- name: Find server jar
+  find:
+    paths: "~minecraft/{{ server_folder }}"
+    patterns: "^([fF][tT][bB][sS][eE][rR][vV][eE][rR].*)|(forge.*universal)\\.jar$"
+    use_regex: yes
+  register: server_jar_search_results
+  become: true
+  become_user: minecraft
+
+- set_fact:
+    server_jar: "{{ server_jar_search_results.files[0].path }}"
+
+- debug:
+    msg: "Server jar: {{ server_jar }}"

@@ -17,7 +17,7 @@
     creates: /etc/no-ip2.conf
   become: true
 
-- name: Enable NoIP service
+- name: Enable and start NoIP service
   systemd:
     name: noip.service
     enabled: yes
