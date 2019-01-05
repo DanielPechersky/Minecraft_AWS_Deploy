@@ -55,7 +55,7 @@
   become_user: minecraft
 
 - set_fact:
-    server_jar: "{{ server_jar_search_results.files[0].path }}"
+    server_jar: "{{ server_jar_search_results.files[0].path.split('/')[-1] }}"
 
 - debug:
     msg: "Server jar: {{ server_jar }}"

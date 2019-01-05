@@ -27,7 +27,7 @@
     aws_access_key: "{{ aws.access_key_id }}"
     aws_secret_key: "{{ aws.secret_access_key }}"
 
-- name: Create ssh key for managing minecraft servers
+- name: Add ssh key to connect to instance
   ec2_key:
     name: minecraft
     key_material: "{{ lookup('file', public_key) }}"

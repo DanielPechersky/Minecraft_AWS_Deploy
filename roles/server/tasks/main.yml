@@ -18,7 +18,13 @@
   become: true
   register: minecraft_user
 
-- name: Retrieve SSH key for user 'minecraft'
+- name: Erase existing key
+  file:
+    path: "keys/{{ inventory_hostname }}.key"
+    state: absent
+  delegate_to: localhost
+
+- name: Retrieve key for user 'minecraft'
   fetch:
     src: "{{ minecraft_user.ssh_key_file }}"
     dest: "keys/{{ inventory_hostname }}.key"
