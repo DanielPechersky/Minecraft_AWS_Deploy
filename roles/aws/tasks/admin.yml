@@ -1,0 +1,23 @@
+---
+- name: Create MinecraftAdmin user
+  iam_user:
+    name: MinecraftAdmin
+    state: present
+    region: "{{ hostvars[host].aws_region }}"
+    aws_access_key: "{{ aws.access_key_id }}"
+    aws_secret_key: "{{ aws.secret_access_key }}"
+
+- name: Create MinecraftAdmin policy
+  iam_policy:
+    iam_name: MinecraftAdmin
+    iam_type: user
+    policy_name: MinecraftAdminPolicy
+    # workaround, iam_policy doesn't currently follow role paths: https://github.com/ansible/ansible/issues/19249
+    policy_json: "{{ lookup('file', 'admin_policy.json') }}"
+    state: present
+    region: "{{ hostvars[host].aws_region }}"
+    aws_access_key: "{{ aws.access_key_id }}"
+    aws_secret_key: "{{ aws.secret_access_key }}"
+
+
+

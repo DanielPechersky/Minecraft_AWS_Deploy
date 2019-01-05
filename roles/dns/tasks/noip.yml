@@ -11,9 +11,15 @@
     state: latest
   become: true
 
+- name: Checking config file
+  stat:
+    path: '/etc/no-ip2.conf'
+  register: config_stat_result
+
 - name: Configure NoIP
   command: "noip2 -C -u {{ noip.username }} -p {{ noip.password }} -U 30"
   become: true
+  when: not config_stat_result.stat.exists or config_stat_result.stat.size == 0
 
 - name: Enable and start NoIP service
   systemd:

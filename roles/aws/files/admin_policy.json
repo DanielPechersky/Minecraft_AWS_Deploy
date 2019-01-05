@@ -1,0 +1,27 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "ec2:StartInstances",
+                "ec2:StopInstances",
+                "ec2:RebootInstances"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "ec2:ResourceTag/game": "minecraft"
+                }
+            },
+            "Resource": "*",
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+              "ec2:DescribeInstances",
+              "ec2:DescribeInstanceStatus"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        }
+    ]
+}
