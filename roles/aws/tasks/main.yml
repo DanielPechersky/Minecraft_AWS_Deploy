@@ -1,9 +1,12 @@
 ---
+- debug:
+    msg: "Creating host: {{ host }}"
+
 - name: Create VPC group
   ec2_group:
     name: minecraft
     description: Security group for minecraft servers
-    region: "{{ aws_region }}"
+    region: "{{ hostvars[host].aws_region }}"
     rules:
       - rule_desc: ssh
         proto: tcp
@@ -11,26 +14,48 @@
         cidr_ip: 0.0.0.0/0
         cidr_ipv6: ::/0
       - rule_desc: minecraft server
-        proto: all
+        proto: tcp
         ports: 25565
         cidr_ip: 0.0.0.0/0
         cidr_ipv6: ::/0
+      - rule_desc: minecraft server
+        proto: udp
+        ports: 25565
+        cidr_ip: 0.0.0.0/0
+        cidr_ipv6: ::/0
+    state: present
     aws_access_key: "{{ aws.access_key_id }}"
     aws_secret_key: "{{ aws.secret_access_key }}"
-  delegate_to: 127.0.0.1
 
 - name: Create ssh key for managing minecraft servers
   ec2_key:
     name: minecraft
     key_material: "{{ lookup('file', public_key) }}"
+    region: "{{ hostvars[host].aws_region }}"
     aws_access_key: "{{ aws.access_key_id }}"
     aws_secret_key: "{{ aws.secret_access_key }}"
-  delegate_to: 127.0.0.1
 
 - name: Create server instance
   ec2_instance:
-    name: "{{ server_instance_name }}"
+    name: "minecraft-{{ host }}"
+    state: present
+    image_id: ami-02e680c4540db351e
+    instance_type: "{{ hostvars[host].aws_instance_type }}"
     key_name: minecraft
     security_group: minecraft
-    state: present
-  delegate_to: 127.0.0.1
+    region: "{{ hostvars[host].aws_region }}"
+    aws_access_key: "{{ aws.access_key_id }}"
+    aws_secret_key: "{{ aws.secret_access_key }}"
+    tags:
+      game: minecraft
+      host_name: "{{ host }}"
+  register: instance_results
+
+- set_fact:
+    ansible_host: "{{ instance_results.instances[0].public_ip_address }}"
+
+- name: Add IP of instance to host
+  add_host:
+    hostname: "{{ host }}"
+    ansible_host: "{{ ansible_host }}"
+    groups: "{{ group_names }}"

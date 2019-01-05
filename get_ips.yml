@@ -1,0 +1,24 @@
+- hosts: 127.0.0.1
+  connection: local
+  tasks:
+    - name: Get each instance associated with each host
+      ec2_instance_facts:
+        filters:
+          "tag:host_name": "{{ item }}"
+          "tag:game": minecraft
+        region: "{{ hostvars[item].aws_region }}"
+        aws_access_key: "{{ aws.access_key_id }}"
+        aws_secret_key: "{{ aws.secret_access_key }}"
+      with_items: "{{ groups.all }}"
+      register: results
+
+    - name: Display all IPs
+      debug:
+        msg: "{{ item.instances[0].public_ip_address }}"
+      with_items: "{{ results.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+  vars_files:
+    - vars/aws.yml
+
+

@@ -1,1 +1,2 @@
-py37-ansible
+ansible
+boto3

@@ -1,8 +1,17 @@
 ---
+- hosts: 127.0.0.1
+  connection: local
+  tasks:
+  - include_role:
+      name: aws
+    vars:
+      host: "{{ item }}"
+    with_items: "{{ groups.all }}"
+  vars_files:
+    - vars/sys.yml
+    - vars/aws.yml
+
 - hosts: all
   roles:
-#    - aws
     - server
     - dns
-#  vars_files:
-#    - vars/aws.yml
