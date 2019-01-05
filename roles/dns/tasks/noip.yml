@@ -13,8 +13,6 @@
 
 - name: Configure NoIP
   command: "noip2 -C -u {{ noip.username }} -p {{ noip.password }} -U 30"
-  args:
-    creates: /etc/no-ip2.conf
   become: true
 
 - name: Enable and start NoIP service
