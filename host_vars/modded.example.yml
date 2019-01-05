@@ -5,5 +5,3 @@ aws_instance_type: t2.medium
 java_params: -Xms2048m -Xmx3328m
 server_file_url: https://minecraft.curseforge.com/projects/sevtech-ages/files/2570735/download
 timezone: America/Toronto
-
-install_script: Install.sh
