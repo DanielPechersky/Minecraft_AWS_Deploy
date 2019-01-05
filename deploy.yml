@@ -15,3 +15,5 @@
   roles:
     - server
     - dns
+
+- import_playbook: get_ips.yml

@@ -6,6 +6,9 @@
         filters:
           "tag:host_name": "{{ item }}"
           "tag:game": minecraft
+          instance-state-name:
+            - pending
+            - running
         region: "{{ hostvars[item].aws_region }}"
         aws_access_key: "{{ aws.access_key_id }}"
         aws_secret_key: "{{ aws.secret_access_key }}"
